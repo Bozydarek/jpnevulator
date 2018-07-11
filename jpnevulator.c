@@ -221,7 +221,10 @@ static void asciiWrite(FILE *output,char *ascii,int asciiSize,int *bytesWritten,
 					}
 				}
 			}
-			fprintf(output,"\t%s",ascii);
+			if(boolIsNotSet(_jpnevulatorOptions.only_ascii)) {
+                fprintf(output, "\t");
+            }
+			fprintf(output,"%s",ascii);
 			memset(ascii,'\0',asciiSize);
 		}
 		fprintf(output,"\n");
@@ -480,18 +483,24 @@ enum jpnevulatorRtrn jpnevulatorRead(void) {
 							headerWrite(output,ascii,asciiSize,&bytesWritten,interfaceReader,interfaceNameCopy,sizeof(interfaceNameCopy),&timeCurrent,&timeLast);
 							for(index=0;index<bytesRead;index++) {
 								if(bytesWritten>=_jpnevulatorOptions.width) {
-									asciiWrite(output,ascii,asciiSize,&bytesWritten,boolFalse);
-								} else if(bytesWritten!=0) {
+									asciiWrite(output,ascii,asciiSize,&bytesWritten,boolFalse); /// commenting this cause *** Error in `./jpnevulator': double free or corruption (out): 0x000055ab0e705700 ***
+
+									// printf("sss=#%s#%d#\n",ascii, bytesWritten);
+								} else if((bytesWritten!=0) && boolIsNotSet(_jpnevulatorOptions.only_ascii)) {
 									fprintf(output," ");
 								}
-								if((bytesWritten==0)&&boolIsSet(_jpnevulatorOptions.byteCountDisplay)) {
+								if((bytesWritten==0) && boolIsSet(_jpnevulatorOptions.byteCountDisplay)) {
 									fprintf(output,"%08lX\t",interfaceReader->byteCount);
 								}
-								bytePut(output,_jpnevulatorOptions.base,message[index]);
-								/* Increase the byte count for this interface. */
+
+								if(boolIsNotSet(_jpnevulatorOptions.only_ascii)) {
+                                    bytePut(output,_jpnevulatorOptions.base,message[index]);
+                                }
+
+                                /* Increase the byte count for this interface. */
 								interfaceReader->byteCount++;
 								if(boolIsSet(_jpnevulatorOptions.ascii)) {
-									ascii[bytesWritten]=isprint(message[index])?message[index]:'.';
+									ascii[bytesWritten]=isprint(message[index])?message[index]:' ';
 								}
 								bytesWritten++;
 							}
@@ -550,7 +559,7 @@ enum jpnevulatorRtrn jpnevulatorRead(void) {
 	
 	/* And if we didn't wrote our ASCII data we most probably need a newline. */
 	if(bytesWritten!=0) {
-		fprintf(output,"\n");	
+		fprintf(output,"\n");
 	}
 
 	/* Close files opened. */

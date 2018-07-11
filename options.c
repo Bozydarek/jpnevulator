@@ -39,7 +39,7 @@ static void usage(void) {
 		"         [--delay-line=microseconds] [--delay-byte=microseconds]\n"
 		"         [--print] [--size=size] [--tty=tty] [--pty [=alias]] [--width] [--pass]\n"
 		"         [--read] [--write] [--timing-print] [--timing-delta=microseconds]\n"
-		"         [--ascii] [--alias-separator=separator] [--byte-count]\n"
+		"         [--ascii] [--only-ascii] [--alias-separator=separator] [--byte-count]\n"
 		"         [--append] [--append-separator=separator] [--control]\n"
 		"         [--control-poll=microseconds] [--count=bytes] [--base] <file>\n",
 		PROGRAM_NAME
@@ -99,6 +99,9 @@ static void optionsDefault(void) {
 
 	/* By default we do not display ascii data in read mode. */
 	boolReset(_jpnevulatorOptions.ascii);
+
+	/* By default we display bytes. */
+	boolReset(_jpnevulatorOptions.only_ascii);
 
 	/* By default the alias separator is the ':' character. */
 	_jpnevulatorOptions.aliasSeparator=":";
@@ -160,6 +163,7 @@ enum optionsRtrn optionsParse(int argc,char **argv) {
 		static struct option long_options[]={
 			{"append",no_argument,NULL,'A'},
 			{"ascii",no_argument,NULL,'a'},
+			{"only-ascii",no_argument,NULL,'x'},
 			{"byte-count",no_argument,NULL,'b'},
 			{"base",required_argument,NULL,'B'},
 			{"checksum",no_argument,NULL,'c'},
@@ -189,7 +193,7 @@ enum optionsRtrn optionsParse(int argc,char **argv) {
 			{"crc8",optional_argument,NULL,'z'},
 			{NULL,no_argument,NULL,0}
 		};
-		option=getopt_long(argc,argv,"aAbB:cCd:D:e:f:ghi:jk:l:no:pPq:rs:S:t:vwy:z:",long_options,&option_index);
+		option=getopt_long(argc,argv,"aAxbB:cCd:D:e:f:ghi:jk:l:no:pPq:rs:S:t:vwy:z:",long_options,&option_index);
 		switch(option) {
 			case -1: {
 				finished=!finished;
@@ -202,6 +206,11 @@ enum optionsRtrn optionsParse(int argc,char **argv) {
 			case 'A': {
 				boolSet(_jpnevulatorOptions.append);
 				break;
+			}
+			case 'x': {
+				boolSet(_jpnevulatorOptions.ascii);
+				boolSet(_jpnevulatorOptions.only_ascii);
+                break;
 			}
 			case 'b': {
 				boolSet(_jpnevulatorOptions.byteCountDisplay);

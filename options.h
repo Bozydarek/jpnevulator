@@ -53,6 +53,7 @@ struct jpnevulatorOptions {
 	bool_t timingPrint;
 	unsigned long timingDelta;
 	bool_t ascii;
+	bool_t only_ascii;
 	char *aliasSeparator;
 	bool_t byteCountDisplay;
 	bool_t pass;
